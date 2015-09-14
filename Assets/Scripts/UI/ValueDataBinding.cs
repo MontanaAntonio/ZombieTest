@@ -40,7 +40,7 @@ public class ValueDataBinding : MonoBehaviour {
 	}
 
 	void Apply()
-    {
+    { 
         if (_tText == null)
             return;
 

@@ -5,13 +5,15 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager ins;
     public Vector2 screenBorders;
-    public int lifes =3;
-    public int bombs = 5;
+    private int _lifes =3;
+    private int _bombs = 5;
     public float finishLinePositionZ;
     public Transform finishLine;
     public float offsetFinishLine = 1;
-    private float timer = 60;
+    private float _timer = 60;
     public VisualLifeController lifeController;
+    private int _score;
+    public UnitsManager unitsManager;
     
     void Awake () {
         
@@ -20,6 +22,12 @@ public class GameManager : MonoBehaviour
 
         if (lifeController==null)
         lifeController = GetComponent<VisualLifeController>();
+
+        if (unitsManager == null)
+            unitsManager = GetComponent<UnitsManager>();
+
+
+
     }
 
     private void Start()
@@ -27,22 +35,38 @@ public class GameManager : MonoBehaviour
         screenBorders = GetScreenBorders();
         Debug.Log("Width = " + screenBorders.x + "; Height is = " + screenBorders.y);
         finishLinePositionZ = -screenBorders.y+ offsetFinishLine;
+        SetDefaultParameters();
     }
 
     public float Timer
     {
-        get { return timer; }
+        get { return _timer; }
+        set { _timer = value; }
+    }
+    public int Score
+    {
+        get { return _score; }
+        set { _score = value; }
     }
 
-
+    public int Bombs
+    {
+        get { return _bombs; }
+        set { _bombs = value; }
+    }
 
     public void TimerCountdown()
     {
-        timer -= Time.deltaTime;
-        if (timer <= 0)
+        Timer -= Time.deltaTime;
+        if (Timer <= 0)
         {
             LevelClear();
         }
+    }
+
+    public void Lose()
+    {
+        ChangeGameState(UIManager.UIState.LOSE);
     }
 
     public void ChangeGameState(UIManager.UIState gamestate)
@@ -54,27 +78,38 @@ public class GameManager : MonoBehaviour
     public void LevelClear()
     {
         ChangeGameState(UIManager.UIState.LEVEL_CLEAR);
-        Debug.Log("LevelClear");
-    }
-
-    public void YouLose()
-    {
-
     }
 
     public void Restart()
     {
-
+        ClearGameField();
+        ChangeGameState(UIManager.UIState.PLAY_GAME);
+        SetDefaultParameters();
     }
 
-    public void RandomSpawnUnit()
+    public void SetDefaultParameters()
     {
+        Timer = 60; //default time round
+        Score = 0;
+        _lifes = 3;
+        _bombs = 3;
+        lifeController.AddLifes(_lifes);
+    }
 
+    public void ClearGameField()
+    {
+        // выключить всех противников
+     unitsManager.DisableAllunits();
+    }
+
+    public void MainMenu()
+    {
+        ChangeGameState(UIManager.UIState.MAIN_MENU);
     }
 
     public void StartGame()
     {
-        ChangeGameState(UIManager.UIState.PLAY_GAME);
+        Restart();
     }
 
     public void OnClick(string cmd)
@@ -87,14 +122,7 @@ public class GameManager : MonoBehaviour
 
         AnyChanged();
     }
-
-
-
-    public void StartNextLevel()
-    {
-
-    }
-
+    
     private Vector2 GetScreenBorders()
     {
         Camera cam = Camera.main;
@@ -125,15 +153,8 @@ public class GameManager : MonoBehaviour
 
         if (UIManager.ins.uistate!= UIManager.UIState.PLAY_GAME)
             return;
-
-        if (Input.GetKeyUp(KeyCode.S))
-        {
-            RandomSpawnUnit();
-        }
-
-   
-
-
+        
+        unitsManager.SpawnUnits();
         TimerCountdown();
 
         if (Input.touchCount > 0 || Input.GetMouseButtonDown(0))
@@ -163,11 +184,27 @@ public class GameManager : MonoBehaviour
 
     public void MinusLife()
     {
-
+        if (_lifes-1 > 0)
+        {
+            SoundManager.ins.MinusLife();
+            EffectsManager.ins.MinusLifeEffect();
+            lifeController.RemoveLife();
+            _lifes--;
+        }
+        else
+        {
+            Lose();
+        }
     }
 
     public void AnyChanged()
     {
       ViewModel.ins.Changed();
+    }
+
+    public void SetScore(int scoreForKill)
+    {
+        Score += scoreForKill;
+        AnyChanged();
     }
 }

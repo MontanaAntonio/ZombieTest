@@ -65,10 +65,6 @@ public class ViewModel : MonoBehaviour {
     }
 
 
-    public void  TimerCountdown()
-    {
-        currentStringValue = String.Format("{0:0}", GameManager.ins.Timer);
-    }
 
     public static void MakeChanged()
     {
@@ -120,6 +116,8 @@ public class ViewModel : MonoBehaviour {
         currentBoolValue = UIManager.ins.uistate == UIManager.UIState.PAUSE;
     }
 
+
+
     internal float CallFloat(string msg)
     {
         System.Type thisType = this.GetType();
@@ -167,5 +165,21 @@ public class ViewModel : MonoBehaviour {
         }
     }
 
- 
+
+
+    public void CurrentLevelScore()
+    {
+        currentStringValue = GameManager.ins.Score.ToString();
+    }
+    public void TimerCountdown()
+    {
+        currentStringValue = String.Format("{0:0}", GameManager.ins.Timer);
+    }
+
+
+    public void Bombs()
+    {
+        currentStringValue = String.Format("{0}", GameManager.ins.Bombs);
+    }
+
 }

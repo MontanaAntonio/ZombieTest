@@ -34,6 +34,7 @@ public class VisualLifeController : MonoBehaviour
         {
           GameObject go = Instantiate(lifeSpritePrefab) ;
           go.transform.parent = lifesPanel;
+           go.transform.localScale = Vector3.one;
         }
     }
 
